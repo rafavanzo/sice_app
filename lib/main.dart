@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'pages/mover_items.dart';
+import 'pages/consultar_locais.dart';
+import 'pages/consultar_items.dart';
 
 void main() {
   runApp(MyApp());
@@ -30,6 +32,46 @@ class HomePage extends StatelessWidget {
       ),
       padding: const EdgeInsets.symmetric(vertical: 16),
     );
+
+    void _mostrarOpcoesConsulta() {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Selecione o tipo de consulta'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ListTile(
+                  leading: Icon(Icons.location_on),
+                  title: Text('Local'),
+                  onTap: () {
+                    Navigator.pop(context); // Fecha o diálogo
+                    // Navega para a tela de consulta de locais
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => ConsultarLocaisPage()),
+                    );
+                  },
+                ),
+                ListTile(
+                  leading: Icon(Icons.inventory),
+                  title: Text('Item'),
+                  onTap: () {
+                    Navigator.pop(context);
+                    // Navega para a tela de consulta de itens
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => ConsultarItemsPage()),
+                    );
+                  },
+                ),
+              ],
+            ),
+          );
+        },
+      );
+    }
 
     return Scaffold(
       appBar: AppBar(
@@ -74,8 +116,7 @@ class HomePage extends StatelessWidget {
                 width: double.infinity,
                 child: ElevatedButton(
                   style: customButtonStyle,
-                  onPressed: () {
-                  },
+                  onPressed: _mostrarOpcoesConsulta,
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: const [

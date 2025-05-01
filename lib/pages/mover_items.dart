@@ -89,7 +89,9 @@ class _MoverItensPageState extends State<MoverItensPage> {
   }
 
   /// Constrói a interface com base no estado da câmera.
-  /// Exibe: 1) Mensagem de erro, 2) Indicador de carregamento,
+  /// Exibe:
+  /// 1) Mensagem de erro,
+  /// 2) Indicador de carregamento,
   /// ou 3) Visualização da câmera para escanear QR codes.
   Widget _buildBody() {
     if (_isCameraError) {
