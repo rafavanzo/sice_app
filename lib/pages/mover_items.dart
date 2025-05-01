@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
-import 'package:permission_handler/permission_handler.dart';
 
-/// Página de câmera para escaneamento dos itens a serem movidos.
+/// Página de câmera para escaneamento de QR codes dos itens a serem movidos.
 /// Gerencia permissões, inicialização e visualização da câmera para identificação
-/// dos itens.
+/// dos itens através de seus códigos QR.
 class MoverItensPage extends StatefulWidget {
   const MoverItensPage({Key? key}) : super(key: key);
 
@@ -15,69 +14,57 @@ class MoverItensPage extends StatefulWidget {
 class _MoverItensPageState extends State<MoverItensPage> {
   late CameraController _cameraController;
   late Future<void> _initializeControllerFuture;
-  bool _isCameraPermissionGranted = false;
   bool _isCameraInitialized = false;
+  bool _isCameraError = false;
+  String _errorMessage = '';
 
   @override
   void initState() {
     super.initState();
-    _checkAndRequestCameraPermission();
+    _initializeCamera();
   }
 
-  /// Verifica e solicita permissão de câmera se necessário.
-  /// Verifica se a permissão já foi concedida antes de solicitar,
-  /// evitando diálogos desnecessários para o usuário.
-  Future<void> _checkAndRequestCameraPermission() async {
-    final status = await Permission.camera.status;
-
-    if (status.isGranted) {
-      setState(() {
-        _isCameraPermissionGranted = true;
-      });
-      _initializeCamera();
-    } else {
-      final requestStatus = await Permission.camera.request();
-
-      if (requestStatus.isGranted) {
-        setState(() {
-          _isCameraPermissionGranted = true;
-        });
-        _initializeCamera();
-      }
-    }
-  }
-
-  /// Inicializa a câmera.
+  /// Inicializa a câmera para leitura de QR codes.
   /// Configura a câmera traseira com resolução média para otimizar
-  /// o reconhecimento da camera.
+  /// o reconhecimento de QR codes com boa performance.
   Future<void> _initializeCamera() async {
-    final cameras = await availableCameras();
-
-    if (cameras.isEmpty) {
-      setState(() {
-        _isCameraInitialized = false;
-      });
-      return;
-    }
-
-    final firstCamera = cameras.first;
-
-    _cameraController = CameraController(
-      firstCamera,
-      ResolutionPreset.medium,
-      enableAudio: false,
-    );
-
-    _initializeControllerFuture = _cameraController.initialize();
-
     try {
-      await _initializeControllerFuture;
-      setState(() {
-        _isCameraInitialized = true;
-      });
+      final cameras = await availableCameras();
+
+      if (cameras.isEmpty) {
+        setState(() {
+          _isCameraError = true;
+          _errorMessage = 'Nenhuma câmera encontrada no dispositivo.';
+        });
+        return;
+      }
+
+      final firstCamera = cameras.first;
+
+      _cameraController = CameraController(
+        firstCamera,
+        ResolutionPreset.medium,
+        enableAudio: false,
+      );
+
+      _initializeControllerFuture = _cameraController.initialize();
+
+      try {
+        await _initializeControllerFuture;
+        setState(() {
+          _isCameraInitialized = true;
+          _isCameraError = false;
+        });
+      } catch (e) {
+        setState(() {
+          _isCameraError = true;
+          _errorMessage = 'Erro ao inicializar a câmera: ${e.toString()}';
+        });
+      }
     } catch (e) {
       setState(() {
-        _isCameraInitialized = false;
+        _isCameraError = true;
+        _errorMessage = 'Erro ao acessar a câmera: ${e.toString()}';
       });
     }
   }
@@ -102,22 +89,23 @@ class _MoverItensPageState extends State<MoverItensPage> {
   }
 
   /// Constrói a interface com base no estado da câmera.
-  /// Exibe: 1) Solicitação de permissão, 2) Indicador de carregamento,
+  /// Exibe: 1) Mensagem de erro, 2) Indicador de carregamento,
   /// ou 3) Visualização da câmera para escanear QR codes.
   Widget _buildBody() {
-    if (!_isCameraPermissionGranted) {
+    if (_isCameraError) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Text(
-              'É necessário permissão de câmera',
+            Text(
+              _errorMessage,
               style: TextStyle(fontSize: 18),
+              textAlign: TextAlign.center,
             ),
             const SizedBox(height: 20),
             ElevatedButton(
-              onPressed: _checkAndRequestCameraPermission,
-              child: const Text('Solicitar permissão'),
+              onPressed: _initializeCamera,
+              child: const Text('Tentar novamente'),
             ),
           ],
         ),
