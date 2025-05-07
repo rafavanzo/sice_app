@@ -51,3 +51,5 @@ O SICE (Sistema de Inventário e Controle de Estoque) é um aplicativo Flutter d
 O aplicativo requer as seguintes permissões:
 
 - **Câmera**: Para leitura de QR codes
+
+teste
