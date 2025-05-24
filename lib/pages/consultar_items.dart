@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'item_detalhes.dart';
 
 /// Modelo para representar um item no sistema.
 /// Contém id, nome e local do item.
@@ -290,8 +291,26 @@ class _ConsultarItemsPageState extends State<ConsultarItemsPage> {
               Text('Local: ${item.local}'),
             ],
           ),
+          trailing: const Icon(
+            Icons.chevron_right,
+            color: Colors.grey,
+          ),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 16.0,
+            vertical: 4.0
+          ),
           onTap: () {
-            // Levara para a view do item
+            // Navegar para a view detalhada do item
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => ItemDetalhesPage(
+                  id: item.id,
+                  nome: item.nome,
+                  local: item.local,
+                ),
+              ),
+            );
           },
         );
       },

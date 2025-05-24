@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'local_detalhes.dart';
 
 /// Modelo para representar um local no sistema.
 /// Contém id e nome, mas mudarei futuramente para incluir mais informações.
@@ -278,8 +279,25 @@ class _ConsultarLocaisPageState extends State<ConsultarLocaisPage> {
               color: Colors.black,
             ),
           ),
+          trailing: const Icon(
+            Icons.chevron_right,
+            color: Colors.grey,
+          ),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 16.0,
+            vertical: 4.0
+          ),
           onTap: () {
-            // Levara para a view do local
+            // Navegar para a view detalhada do local
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => LocalDetalhesPage(
+                  id: local.id,
+                  nome: local.nome,
+                ),
+              ),
+            );
           },
         );
       },

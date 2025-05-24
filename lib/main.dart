@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'pages/mover_items.dart';
 import 'pages/consultar_locais.dart';
 import 'pages/consultar_items.dart';
+import 'pages/cadastrar.dart';
 
 void main() {
   runApp(MyApp());
@@ -138,6 +139,10 @@ class HomePage extends StatelessWidget {
                 child: ElevatedButton(
                   style: customButtonStyle,
                   onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => CadastrarPage()),
+                    );
                   },
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
