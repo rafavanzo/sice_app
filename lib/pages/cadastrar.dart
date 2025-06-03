@@ -86,8 +86,8 @@ class _CadastrarPageState extends State<CadastrarPage> {
                 Expanded(
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      primary: _isCadastroLocal ? Colors.orange : Colors.white,
-                      onPrimary: _isCadastroLocal ? Colors.white : Colors.black,
+                      // primary: _isCadastroLocal ? Colors.orange : Colors.white,
+                      // onPrimary: _isCadastroLocal ? Colors.white : Colors.black,
                       padding: const EdgeInsets.symmetric(vertical: 12),
                       side: BorderSide(
                         color: _isCadastroLocal ? Colors.orange : Colors.grey,
@@ -105,8 +105,8 @@ class _CadastrarPageState extends State<CadastrarPage> {
                 Expanded(
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      primary: !_isCadastroLocal ? Colors.orange : Colors.white,
-                      onPrimary: !_isCadastroLocal ? Colors.white : Colors.black,
+                      // primary: !_isCadastroLocal ? Colors.orange : Colors.white,
+                      // onPrimary: !_isCadastroLocal ? Colors.white : Colors.black,
                       padding: const EdgeInsets.symmetric(vertical: 12),
                       side: BorderSide(
                         color: !_isCadastroLocal ? Colors.orange : Colors.grey,
@@ -187,8 +187,8 @@ class _CadastrarPageState extends State<CadastrarPage> {
             padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 8.0),
             child: ElevatedButton(
               style: ElevatedButton.styleFrom(
-                primary: Colors.orange,
-                onPrimary: Colors.white,
+                // primary: Colors.orange,
+                // onPrimary: Colors.white,
                 minimumSize: Size(double.infinity, 50),
                 padding: const EdgeInsets.symmetric(vertical: 15.0),
               ),
@@ -213,8 +213,8 @@ class _CadastrarPageState extends State<CadastrarPage> {
             padding: const EdgeInsets.fromLTRB(16.0, 0.0, 16.0, 16.0),
             child: ElevatedButton(
               style: ElevatedButton.styleFrom(
-                primary: Colors.white,
-                onPrimary: Colors.orange,
+                // primary: Colors.white,
+                // onPrimary: Colors.orange,
                 minimumSize: Size(double.infinity, 50),
                 padding: const EdgeInsets.symmetric(vertical: 15.0),
                 side: BorderSide(color: Colors.orange),

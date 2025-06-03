@@ -25,8 +25,8 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ButtonStyle customButtonStyle = ElevatedButton.styleFrom(
-      primary: Colors.white,
-      onPrimary: Colors.black,
+      // primary: Colors.white,
+      // onPrimary: Colors.black,
       side: const BorderSide(color: Colors.black, width: 2),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),

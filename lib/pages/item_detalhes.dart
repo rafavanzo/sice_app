@@ -123,8 +123,8 @@ class _ItemDetalhesPageState extends State<ItemDetalhesPage> {
         padding: const EdgeInsets.all(16.0),
         child: ElevatedButton(
           style: ElevatedButton.styleFrom(
-            primary: Colors.white,
-            onPrimary: Colors.orange[800],
+            // primary: Colors.white,
+            // onPrimary: Colors.orange[800],
             padding: const EdgeInsets.symmetric(vertical: 15.0),
             side: BorderSide(color: Colors.orange[800]!),
           ),

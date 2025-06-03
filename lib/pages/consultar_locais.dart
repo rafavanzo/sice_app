@@ -210,8 +210,8 @@ class _ConsultarLocaisPageState extends State<ConsultarLocaisPage> {
         padding: const EdgeInsets.all(16.0),
         child: ElevatedButton(
           style: ElevatedButton.styleFrom(
-            primary: Colors.orange,
-            onPrimary: Colors.white,
+            // primary: Colors.orange,
+            // onPrimary: Colors.white,
             padding: const EdgeInsets.symmetric(vertical: 15.0),
           ),
           onPressed: () {
