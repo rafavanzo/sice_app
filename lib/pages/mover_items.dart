@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
+import 'package:mobile_scanner/mobile_scanner.dart';
 
 /// Página de câmera para escaneamento de QR codes dos itens a serem movidos.
 /// Gerencia permissões, inicialização e visualização da câmera para identificação
@@ -39,15 +40,6 @@ class _MoverItensPageState extends State<MoverItensPage> {
         return;
       }
 
-      final firstCamera = cameras.first;
-
-      _cameraController = CameraController(
-        firstCamera,
-        ResolutionPreset.medium,
-        enableAudio: false,
-      );
-
-      _initializeControllerFuture = _cameraController.initialize();
 
       try {
         await _initializeControllerFuture;
@@ -84,8 +76,18 @@ class _MoverItensPageState extends State<MoverItensPage> {
         title: const Text('Mover Itens'),
         backgroundColor: Colors.grey[850],
         foregroundColor: Colors.white,
+        leading: IconButton(
+          icon: Icon(Icons.chevron_left, color: Colors.white, size: 30),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+        elevation: 0,
       ),
-      body: _buildBody(),
+      body: MobileScanner(
+        onDetect: (res) {
+            print(res.barcodes.first.rawValue);
+        },
+      )
+,
     );
   }
 
@@ -94,7 +96,7 @@ class _MoverItensPageState extends State<MoverItensPage> {
   /// 1) Mensagem de erro,
   /// 2) Indicador de carregamento,
   /// ou 3) Visualização da câmera para escanear QR codes.
-  Widget _buildBody() {
+  /* Widget _buildBody() {
     if (_isCameraError) {
       return Center(
         child: Column(
@@ -120,18 +122,5 @@ class _MoverItensPageState extends State<MoverItensPage> {
         child: CircularProgressIndicator(),
       );
     }
-
-    return FutureBuilder<void>(
-      future: _initializeControllerFuture,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.done) {
-          return CameraPreview(_cameraController);
-        } else {
-          return const Center(
-            child: CircularProgressIndicator(),
-          );
-        }
-      },
-    );
-  }
-}
+  }*/
+} 
