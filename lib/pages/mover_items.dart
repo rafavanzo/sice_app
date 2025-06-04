@@ -83,6 +83,7 @@ class _MoverItensPageState extends State<MoverItensPage> {
       appBar: AppBar(
         title: const Text('Mover Itens'),
         backgroundColor: Colors.grey[850],
+        foregroundColor: Colors.white,
       ),
       body: _buildBody(),
     );

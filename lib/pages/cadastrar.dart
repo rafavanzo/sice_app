@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:sice_app/complements/qrcode.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-/// Tela para cadastro de novos locais ou itens no sistema.
+// Tela para cadastro de novos locais ou itens no sistema.
 class CadastrarPage extends StatefulWidget {
   const CadastrarPage({Key? key}) : super(key: key);
 
@@ -22,31 +26,51 @@ class _CadastrarPageState extends State<CadastrarPage> {
     super.dispose();
   }
 
-  void _cadastrar() {
+  Future<void> _cadastrar(String data) async {
+
     setState(() {
       _isLoading = true;
     });
 
-    Future.delayed(Duration(seconds: 1), () {
-      setState(() {
-        _isLoading = false;
-      });
+    await dotenv.load(fileName: ".env");
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(_isCadastroLocal
-            ? 'Local cadastrado com sucesso!'
-            : 'Item cadastrado com sucesso!'),
-          backgroundColor: Colors.green,
-          duration: Duration(seconds: 2),
-        ),
-      );
+    String uri = '${dotenv.env['API_URL']!}/${_isCadastroLocal ? "package" : "item" }';
 
-      _nomeController.clear();
-      _descricaoController.clear();
+    Future<void> sendItem(Object data) async {
+        final res = await http.post(
+            Uri.parse(uri),
+            headers: <String, String>{'Content-Type': 'application/json; charset=UTF-8'},
+            body: data
+        );
 
-      Navigator.of(context).pop();
-    });
+        Future.delayed(Duration(seconds: 3), () {
+            setState(() {
+                _isLoading = false;
+            });
+
+            ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: res.statusCode == 200 ? Text('Local cadastrado com sucesso!') : Column(children: [
+                     Text('Erro ${res.statusCode}'),
+                     Text('Razão ${res.body}')
+                  ]),
+                  backgroundColor: res.statusCode != 200 ? Colors.red : Colors.green,
+                  duration: Duration(seconds: 2),
+                ),
+            );
+
+            if(res.statusCode == 200) {
+
+                _nomeController.clear();
+                _descricaoController.clear();
+
+                Navigator.of(context).pop();
+            }
+
+        });
+    }
+
+    sendItem(data);
   }
 
   @override
@@ -86,12 +110,8 @@ class _CadastrarPageState extends State<CadastrarPage> {
                 Expanded(
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      primary: _isCadastroLocal ? Colors.orange : Colors.white,
-                      onPrimary: _isCadastroLocal ? Colors.white : Colors.black,
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      side: BorderSide(
-                        color: _isCadastroLocal ? Colors.orange : Colors.grey,
-                      ),
+                        backgroundColor: _isCadastroLocal ? Colors.orange : Colors.grey,
+                        foregroundColor: _isCadastroLocal ? Colors.white : Colors.black
                     ),
                     onPressed: () {
                       setState(() {
@@ -105,8 +125,8 @@ class _CadastrarPageState extends State<CadastrarPage> {
                 Expanded(
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      primary: !_isCadastroLocal ? Colors.orange : Colors.white,
-                      onPrimary: !_isCadastroLocal ? Colors.white : Colors.black,
+                        backgroundColor: !_isCadastroLocal ? Colors.orange : Colors.grey,
+                        foregroundColor: !_isCadastroLocal ? Colors.white : Colors.black,
                       padding: const EdgeInsets.symmetric(vertical: 12),
                       side: BorderSide(
                         color: !_isCadastroLocal ? Colors.orange : Colors.grey,
@@ -177,6 +197,12 @@ class _CadastrarPageState extends State<CadastrarPage> {
                 ),
               ),
             ),
+            SizedBox(height: 24),
+            Row(
+                children: [
+                    const GenQRCode()
+                ],
+            ),
           ],
         ),
       ),
@@ -187,12 +213,16 @@ class _CadastrarPageState extends State<CadastrarPage> {
             padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 8.0),
             child: ElevatedButton(
               style: ElevatedButton.styleFrom(
-                primary: Colors.orange,
-                onPrimary: Colors.white,
+                backgroundColor: Colors.orange,
+                foregroundColor: Colors.white,
                 minimumSize: Size(double.infinity, 50),
                 padding: const EdgeInsets.symmetric(vertical: 15.0),
               ),
-              onPressed: _isLoading ? null : _cadastrar,
+              onPressed: () {
+                _cadastrar(
+                    jsonEncode(<String, Map>{"record": {"name": _nomeController.text, "description": _descricaoController.text} })
+                );
+              },
               child: _isLoading
                 ? const SizedBox(
                     height: 20,
@@ -213,12 +243,12 @@ class _CadastrarPageState extends State<CadastrarPage> {
             padding: const EdgeInsets.fromLTRB(16.0, 0.0, 16.0, 16.0),
             child: ElevatedButton(
               style: ElevatedButton.styleFrom(
-                primary: Colors.white,
-                onPrimary: Colors.orange,
+                backgroundColor: Colors.white,
+                foregroundColor: Colors.orange,
                 minimumSize: Size(double.infinity, 50),
                 padding: const EdgeInsets.symmetric(vertical: 15.0),
-                side: BorderSide(color: Colors.orange),
-                              ),
+                side: BorderSide(color: Colors.orange)
+                ),
               onPressed: () => Navigator.of(context).pop(),
               child: const Text(
                 'Cancelar',

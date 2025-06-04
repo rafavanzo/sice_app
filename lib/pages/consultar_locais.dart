@@ -1,5 +1,8 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'local_detalhes.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:http/http.dart' as http;
 
 /// Modelo para representar um local no sistema.
 /// Contém id e nome, mas mudarei futuramente para incluir mais informações.
@@ -15,34 +18,17 @@ class Local {
 class LocalService {
   /// Busca todos os locais (simulado).
   /// Será substituído por chamada à API real.
-  Future<List<Local>> buscarLocais() async {
-    await Future.delayed(Duration(milliseconds: 800));
-
-    return [
-      Local(id: '1', nome: 'Almoxarifado A'),
-      Local(id: '2', nome: 'Depósito Central'),
-      Local(id: '3', nome: 'Estante 42'),
-      Local(id: '4', nome: 'Galpão B'),
-      Local(id: '5', nome: 'Prateleira 7'),
-      Local(id: '6', nome: 'Seção 12'),
-      Local(id: '7', nome: 'Estante Z'),
-      Local(id: '8', nome: 'Corredor 3'),
-      Local(id: '9', nome: 'Bloco D'),
-      Local(id: '10', nome: 'Armazém Principal'),
-    ];
-  }
 
   /// Filtra locais pelo nome (simulado).
   /// Retorna lista filtrada de objetos Local.
-  Future<List<Local>> buscarLocaisPorNome(String query) async {
-    final locais = await buscarLocais();
+  Future<List<dynamic>> buscarLocaisPorNome(String query, List<dynamic> locais) async {
 
     if (query.isEmpty) {
       return locais;
     }
 
     return locais
-        .where((local) => local.nome.toLowerCase().contains(query.toLowerCase()))
+        .where((local) => local['name'].toLowerCase().contains(query.toLowerCase()))
         .toList();
   }
 }
@@ -60,8 +46,8 @@ class _ConsultarLocaisPageState extends State<ConsultarLocaisPage> {
   final TextEditingController _pesquisaController = TextEditingController();
   final LocalService _localService = LocalService();
 
-  List<Local> _locais = [];
-  List<Local> _locaisFiltrados = [];
+  List<dynamic> _locais = [];
+  List<dynamic> _locaisFiltrados = [];
 
   bool _isLoading = false;
   bool _hasError = false;
@@ -75,21 +61,43 @@ class _ConsultarLocaisPageState extends State<ConsultarLocaisPage> {
     _carregarLocais();
   }
 
+
   /// Carrega a lista inicial de locais.
   /// Ponto futuro de integração com API real.
   Future<void> _carregarLocais() async {
-    setState(() {
-      _isLoading = true;
-      _hasError = false;
-    });
-
     try {
-      final locais = await _localService.buscarLocais();
+
+        await dotenv.load(fileName: '.env');
+
+        String uri = '${dotenv.env['API_URL']!}/package';
+
+        setState(() {
+          _isLoading = true;
+          _hasError = false;
+        });
+
+        final res = await http.get(
+            Uri.parse(uri),
+            headers: <String, String>{'Content-type': 'application/json; charset=UTF-8'}
+        );
+
+        if(res.statusCode != 200)  {
+            setState(() {
+                _isLoading = false;
+                _hasError = true;
+            });
+
+            return;
+        }
+
+      final List<dynamic>locais = jsonDecode(res.body)['data'];
+
       setState(() {
         _locais = locais;
         _locaisFiltrados = locais;
         _isLoading = false;
       });
+
     } catch (e) {
       setState(() {
         _hasError = true;
@@ -115,7 +123,7 @@ class _ConsultarLocaisPageState extends State<ConsultarLocaisPage> {
     });
 
     try {
-      final List<Local> locaisFiltrados = await _localService.buscarLocaisPorNome(query);
+      final List<dynamic> locaisFiltrados = await _localService.buscarLocaisPorNome(query, _locais);
 
       setState(() {
         _locaisFiltrados = locaisFiltrados;
@@ -210,8 +218,8 @@ class _ConsultarLocaisPageState extends State<ConsultarLocaisPage> {
         padding: const EdgeInsets.all(16.0),
         child: ElevatedButton(
           style: ElevatedButton.styleFrom(
-            primary: Colors.orange,
-            onPrimary: Colors.white,
+            // primary: Colors.orange,
+            // onPrimary: Colors.white,
             padding: const EdgeInsets.symmetric(vertical: 15.0),
           ),
           onPressed: () {
@@ -273,7 +281,7 @@ class _ConsultarLocaisPageState extends State<ConsultarLocaisPage> {
         final local = _locaisFiltrados[index];
         return ListTile(
           title: Text(
-            local.nome,
+            local['name'],
             style: const TextStyle(
               fontSize: 16,
               color: Colors.black,
@@ -293,8 +301,9 @@ class _ConsultarLocaisPageState extends State<ConsultarLocaisPage> {
               context,
               MaterialPageRoute(
                 builder: (context) => LocalDetalhesPage(
-                  id: local.id,
-                  nome: local.nome,
+                  id: local['id'],
+                  nome: local['name'],
+                  descricao: local['description'],
                 ),
               ),
             );

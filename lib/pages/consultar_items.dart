@@ -1,5 +1,9 @@
+import 'dart:developer';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'item_detalhes.dart';
+import 'package:http/http.dart' as http;
 
 /// Modelo para representar um item no sistema.
 /// Contém id, nome e local do item.
@@ -78,6 +82,7 @@ class _ConsultarItemsPageState extends State<ConsultarItemsPage> {
     _items = [];
     _itemsFiltrados = [];
     _carregarItems();
+    teste();
   }
 
   /// Carrega a lista inicial de itens.
@@ -135,6 +140,18 @@ class _ConsultarItemsPageState extends State<ConsultarItemsPage> {
     }
   }
 
+  Future teste() async {
+    final res = await http.get(Uri.parse('https://www.google.com'));
+    
+    if(res.statusCode != 200) {
+        print("Mensagem");
+
+        return false;
+    }
+
+    return res;
+  }
+
   @override
   void dispose() {
     _pesquisaController.dispose();
@@ -175,6 +192,7 @@ class _ConsultarItemsPageState extends State<ConsultarItemsPage> {
                         controller: _pesquisaController,
                         onChanged: (String value) {
                           _filtrarItems(value);
+                          teste();
                         },
                         decoration: InputDecoration(
                           hintText: 'Digite para buscar um item',
@@ -215,8 +233,8 @@ class _ConsultarItemsPageState extends State<ConsultarItemsPage> {
         padding: const EdgeInsets.all(16.0),
         child: ElevatedButton(
           style: ElevatedButton.styleFrom(
-            primary: Colors.orange,
-            onPrimary: Colors.white,
+            // primary: Colors.orange,
+            // onPrimary: Colors.white,
             padding: const EdgeInsets.symmetric(vertical: 15.0),
           ),
           onPressed: () {
@@ -253,7 +271,9 @@ class _ConsultarItemsPageState extends State<ConsultarItemsPage> {
             ),
             const SizedBox(height: 16),
             ElevatedButton(
-              onPressed: _carregarItems,
+              onPressed: () {
+                _carregarItems;
+              },
               child: const Text('Tentar novamente'),
             ),
           ],
