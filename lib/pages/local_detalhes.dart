@@ -240,7 +240,7 @@ class _LocalDetalhesPageState extends State<LocalDetalhesPage> {
                             builder: (context) => ItemDetalhesPage(
                               id: item.id,
                               nome: item.nome,
-                              local: item.local,
+                              // local: item.local,
                             ),
                           ),
                         );
