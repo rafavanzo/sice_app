@@ -221,6 +221,7 @@ class _ItemDetalhesPageState extends State<ItemDetalhesPage> {
                   MaterialPageRoute(
                     builder: (context) => LocalDetalhesPage(
                       id: _localId,
+                      descricao: "",
                       nome: widget.local,
                     ),
                   ),
