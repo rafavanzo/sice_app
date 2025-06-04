@@ -112,7 +112,7 @@ class _ConsultarLocaisPageState extends State<ConsultarLocaisPage> {
   Future<void> _filtrarLocais(String query) async {
     if (query.isEmpty) {
       setState(() {
-        _locaisFiltrados = List<Local>.from(_locais);
+        _locaisFiltrados = List<dynamic>.from(_locais);
         _isLoading = false;
       });
       return;
