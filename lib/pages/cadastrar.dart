@@ -198,11 +198,6 @@ class _CadastrarPageState extends State<CadastrarPage> {
               ),
             ),
             SizedBox(height: 24),
-            Row(
-                children: [
-                    const GenQRCode()
-                ],
-            ),
           ],
         ),
       ),
