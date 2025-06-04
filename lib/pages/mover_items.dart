@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -145,7 +144,6 @@ class _MoverItensPageState extends State<MoverItensPage> {
 
     @override
     Widget build(BuildContext context) {
-
         if (_isCameraError) {
           return Center(
             child: Column(
