@@ -86,35 +86,40 @@ class _MoverItensPageState extends State<MoverItensPage> {
         }
     }
 
-    Future<dynamic> saveSchema() async {
+    Future<dynamic> queryPackage() async {
         dotenv.load(fileName: '.env');
 
-        final String uri = '${dotenv.env['API_URL']!}/""';
+        final String uri = '${dotenv.env['API_URL']!}/package?id=$_localQr';
 
         setState(() {
             _isLoading = true;
         });
 
         try {
-            final res = await http.put(
+            final res = await http.get(
                 Uri.parse(uri),
                 headers: <String,String>{'Content-Type': 'application/json; charset=UTF-8'},
-                body: jsonEncode({
-                    'itens': _itens,
-                    'local': _localQr
-                }),
             );
 
-            ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                    content: res.statusCode == 200 ? Text('Local cadastrado com sucesso!') : Column(children: [
-                        Text('Erro ${res.statusCode}'),
-                        Text('Razão ${res.body}')
-                    ]),
-                    backgroundColor: res.statusCode != 200 ? Colors.red : Colors.green,
-                    duration: Duration(seconds: 8),
-                ),
-            );
+            if(res.statusCode != 200) {
+                return ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                        content: res.statusCode == 200 ? Text('Local cadastrado com sucesso!') : Column(children: [
+                            Text('Erro ${res.statusCode}'),
+                            Text('Razão ${res.body}')
+                        ]),
+                        backgroundColor: res.statusCode != 200 ? Colors.red : Colors.green,
+                        duration: Duration(seconds: 8),
+                    ),
+                );
+            }
+
+            print(res.body);
+
+            setState(() {
+                _firstScan = false;
+            });
+
         } catch(err) {
             // ignore: avoid_print
             print(err);
@@ -140,6 +145,33 @@ class _MoverItensPageState extends State<MoverItensPage> {
 
     @override
     Widget build(BuildContext context) {
+
+        if (_isCameraError) {
+          return Center(
+            child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                    Text(
+                    _errorMessage,
+                    style: TextStyle(fontSize: 18),
+                    textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 20),
+                ElevatedButton(
+                    onPressed: _initializeCamera,
+                    child: const Text('Tentar novamente'),
+                ),
+                ],
+            ),
+          );
+        }
+
+        if (!_isCameraInitialized) {
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        }
+
         return Scaffold(
             appBar: AppBar(
                 title: const Text('Mover Itens'),
@@ -203,9 +235,7 @@ class _MoverItensPageState extends State<MoverItensPage> {
                             Text(_localQr),
                             ElevatedButton(
                                 onPressed: () {
-                                    setState(() {
-                                        _firstScan = false;
-                                    });
+                                    queryPackage();
                                 },
                                 style: ElevatedButton.styleFrom(
                                     backgroundColor: Colors.orange,
@@ -230,7 +260,6 @@ class _MoverItensPageState extends State<MoverItensPage> {
                             SizedBox(height: 20),
                             ElevatedButton(
                                 onPressed: () {
-                                    saveSchema();
                                 },
                                 style: ElevatedButton.styleFrom(
                                     backgroundColor: Colors.orange,
@@ -264,3 +293,4 @@ class _MoverItensPageState extends State<MoverItensPage> {
         ));
     }
 } 
+
