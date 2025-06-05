@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sice_app/pages/local_detalhes.dart';
+import 'package:http/http.dart' as http;
 
 /// Tela de detalhes do item selecionado.
 /// Exibe informações do item e permite navegar para o local onde está.
@@ -71,8 +72,9 @@ class _ItemDetalhesPageState extends State<ItemDetalhesPage> {
             padding: const EdgeInsets.symmetric(vertical: 15.0),
             side: BorderSide(color: Colors.orange[800]!),
           ),
-          onPressed: () {
-            print('Remover item do local');
+          onPressed: () async {
+            print('id: ${widget.id}');
+            // await http.delete(Uri.parse(uri))
           },
           child: const Text(
             'Remover do Local',

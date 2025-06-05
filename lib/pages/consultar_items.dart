@@ -156,6 +156,8 @@ class _ConsultarItemsPageState extends State<ConsultarItemsPage> {
         return;
       }
 
+      print('itens on load itens ${item.body}');
+
       final dynamic itemData = jsonDecode(item.body)['data'];
 
       setState(() {
@@ -376,6 +378,8 @@ class _ConsultarItemsPageState extends State<ConsultarItemsPage> {
 
               return;
             }
+
+            print('id ${res}');
 
             Navigator.push(
                 _scaffoldKey.currentContext!,
