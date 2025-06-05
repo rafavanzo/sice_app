@@ -41,8 +41,8 @@ class ItemService {
     }
 
     return items
-        .where((item) =>
-            item['name'].toLowerCase().contains(query.toLowerCase()))
+        .where(
+            (item) => item['name'].toLowerCase().contains(query.toLowerCase()))
         .toList();
   }
 }
@@ -76,8 +76,7 @@ class _ConsultarItemsPageState extends State<ConsultarItemsPage> {
     _carregarItems();
   }
 
-  dynamic _carregarLocal(
-      String id, String nome) async {
+  dynamic _carregarLocal(String id, String nome) async {
     try {
       await dotenv.load(fileName: ".env");
 
@@ -101,16 +100,20 @@ class _ConsultarItemsPageState extends State<ConsultarItemsPage> {
 
         final errorData = jsonDecode(package.body);
 
-        return { "error": true, "statusCode": package.statusCode, "body": errorData['error']};
+        return {
+          "error": true,
+          "statusCode": package.statusCode,
+          "body": errorData['error']
+        };
       }
 
       final dynamic packageData = jsonDecode(package.body)['data'];
 
-        setState(() {
-            _isLoading = false;
-        });
+      setState(() {
+        _isLoading = false;
+      });
 
-        return {"id": id, "nome": nome, "packageData": packageData };
+      return {"id": id, "nome": nome, "packageData": packageData};
     } catch (e) {
       setState(() {
         _hasError = true;
@@ -280,23 +283,6 @@ class _ConsultarItemsPageState extends State<ConsultarItemsPage> {
           ),
         ],
       ),
-      bottomNavigationBar: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: ElevatedButton(
-          style: ElevatedButton.styleFrom(
-            // primary: Colors.orange,
-            // onPrimary: Colors.white,
-            padding: const EdgeInsets.symmetric(vertical: 15.0),
-          ),
-          onPressed: () {
-            // Levara a camera para ler o QR Code
-          },
-          child: const Text(
-            'Ler uma Etiqueta',
-            style: TextStyle(fontSize: 18),
-          ),
-        ),
-      ),
       backgroundColor: Colors.white,
     );
   }
@@ -369,30 +355,32 @@ class _ConsultarItemsPageState extends State<ConsultarItemsPage> {
           contentPadding:
               const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
           onTap: () async {
-              final res = await _carregarLocal(item['tagid'].toString(), item['name']);
+            final res =
+                await _carregarLocal(item['tagid'].toString(), item['name']);
 
-              if(res["error"] == true) {
-                ScaffoldMessenger.of(_scaffoldKey.currentContext!).showSnackBar(
-                  SnackBar(
-                    content: Column(children: [
-                        Text('Erro ${res["statusCode"]}'),
-                        Text('Razão: ${res["body"]}')
-                    ]),
-                    backgroundColor: Colors.red,
-                    duration: Duration(seconds: 4),
-                  ),
-                );
+            if (res["error"] == true) {
+              ScaffoldMessenger.of(_scaffoldKey.currentContext!).showSnackBar(
+                SnackBar(
+                  content: Column(children: [
+                    Text('Erro ${res["statusCode"]}'),
+                    Text('Razão: ${res["body"]}')
+                  ]),
+                  backgroundColor: Colors.red,
+                  duration: Duration(seconds: 4),
+                ),
+              );
 
-                return;
-              }
+              return;
+            }
 
-              Navigator.push(
-                  _scaffoldKey.currentContext!,
-                  MaterialPageRoute(
-                      builder: (context) => ItemDetalhesPage(id: res['id'], nome: res['nome'], local: res['packageData'])
-                    )
-                );
-            },
+            Navigator.push(
+                _scaffoldKey.currentContext!,
+                MaterialPageRoute(
+                    builder: (context) => ItemDetalhesPage(
+                        id: res['id'],
+                        nome: res['nome'],
+                        local: res['packageData'])));
+          },
         );
       },
     );

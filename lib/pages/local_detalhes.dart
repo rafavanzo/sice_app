@@ -17,7 +17,11 @@ class LocalDetalhesPage extends StatefulWidget {
   dynamic local;
 
   LocalDetalhesPage(
-      {super.key, required this.id, required this.nome, required this.local, this.descricao});
+      {super.key,
+      required this.id,
+      required this.nome,
+      required this.local,
+      this.descricao});
 
   @override
   State<LocalDetalhesPage> createState() => _LocalDetalhesPageState();
@@ -35,7 +39,6 @@ class _LocalDetalhesPageState extends State<LocalDetalhesPage> {
     super.initState();
     _carregarDetalhesLocal();
   }
-
 
   Future<void> _carregarDetalhesLocal() async {
     setState(() {

@@ -146,11 +146,14 @@ class _ConsultarLocaisPageState extends State<ConsultarLocaisPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'Consultar Locais',
-          style: TextStyle(color: Colors.white),
-        ),
-        backgroundColor: Colors.grey[850],
+        title: const Text('Consultar Locais'),
+          backgroundColor: Colors.grey[850],
+          foregroundColor: Colors.white,
+          leading: IconButton(
+            icon: Icon(Icons.chevron_left, color: Colors.white, size: 30),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+          elevation: 0,
       ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
