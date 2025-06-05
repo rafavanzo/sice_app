@@ -78,9 +78,14 @@ class _MoverItensPageState extends State<MoverItensPage> {
     if (!_readingEnabled) return;
 
     if (_firstScan) {
-      setState(() {
-        _localQr = input;
-      });
+            setState(() {
+                _localQr = input;
+            });
+        } else {
+            setState(() {
+                _itens.add(input);
+            });
+        }
     }
 
     if (!_firstScan) {
