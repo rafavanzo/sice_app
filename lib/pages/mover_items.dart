@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -105,66 +106,56 @@ class _MoverItensPageState extends State<MoverItensPage> {
 
     int successCount = 0;
     List<String> failedItems = [];
+    String itensIds = "";
 
+    for (var i = 0; i < _itens.length; i++) {
+
+        i + 1 == _itens.length ? itensIds += "${_itens[i]}" : itensIds += "${_itens[i]},";
+    }
     try {
-      for (var itemId in _itens) {
         try {
           final response = await http.post(
-            Uri.parse('$uri/item'),
+            Uri.parse('$uri/item/move'),
             headers: <String, String>{
               'Content-Type': 'application/json; charset=UTF-8'
             },
-            body: jsonEncode(<String, Map>{
-               "record": {
-                   'id': itemId,
-                   // 'packageId': _localQr,
-                   'tagid': _localQr,
-                   'name': "item $itemId",
-                   'description': 'Sem Descrição',
-                }
+            body: jsonEncode(<String, dynamic>{
+                'packageId': _localQr,
+                'itemIds': itensIds,
             }),
           );
 
-          if (response.statusCode == 200) {
-            successCount++;
-          } else {
-            failedItems.add('$itemId (Erro: ${response.statusCode}) - ${jsonDecode(response.body)['error']}');
+         // final data = jsonDecode(response.body)['data'];
 
-            // print('error on add iten: ${response.body}');
-          }
+         if(response.statusCode != 200) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Os itens não puderam ser movidos!'),
+                      if (failedItems.isNotEmpty) ...[
+                        SizedBox(height: 8),
+                        Text('Falhas:'),
+                        ...failedItems.take(3).map((item) => Text('- $item')),
+                        if (failedItems.length > 3)
+                          Text('+ ${failedItems.length - 3} outros erros')
+                      ]
+                    ],
+                  ),
+                  backgroundColor: failedItems.isEmpty ? Colors.green : Colors.orange,
+                  duration: Duration(seconds: 8),
+                ),
+            );
+         } else  {
+             Navigator.pop(context);
+         }
         } catch (itemError) {
-          failedItems.add('$itemId (Erro: $itemError)');
+            setState(() {
+              _isLoading = false;
+            });
         }
-      }
-
-      final message = successCount == _itens.length
-          ? 'Todos os ${_itens.length} itens foram movidos com sucesso!'
-          : 'Movidos $successCount de ${_itens.length} itens.';
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(message),
-              if (failedItems.isNotEmpty) ...[
-                SizedBox(height: 8),
-                Text('Falhas:'),
-                ...failedItems.take(3).map((item) => Text('- $item')),
-                if (failedItems.length > 3)
-                  Text('+ ${failedItems.length - 3} outros erros')
-              ]
-            ],
-          ),
-          backgroundColor: failedItems.isEmpty ? Colors.green : Colors.orange,
-          duration: Duration(seconds: 8),
-        ),
-      );
-
-      if(successCount == _itens.length) {
-          Navigator.pop(context);
-      }
     } catch (err) {
       // ignore: avoid_print
       print(err);
