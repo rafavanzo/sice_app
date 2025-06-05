@@ -16,6 +16,7 @@ class MoverItensPage extends StatefulWidget {
 }
 
 class _MoverItensPageState extends State<MoverItensPage> {
+    final TextEditingController _tagController = TextEditingController();
     late CameraController _cameraController;
     late Future<void> _initializeControllerFuture;
     // Barcode? _qrCode;
@@ -73,15 +74,17 @@ class _MoverItensPageState extends State<MoverItensPage> {
     }
 
     void scanQR(BarcodeCapture scan) {
-        if(_firstScan) {
-            setState(() {
-                _localQr = scan.barcodes.first.rawValue ?? "";
-            });
-        }
+        handleInput(scan.barcodes.first.rawValue ?? "");
+    }
 
-        if(!_firstScan) {
+    void handleInput(String input) {
+        if (_firstScan) {
             setState(() {
-                _itens.add(scan.barcodes.first.rawValue);
+                _localQr = input;
+            });
+        } else {
+            setState(() {
+                _itens.add(input);
             });
         }
     }
@@ -153,8 +156,9 @@ class _MoverItensPageState extends State<MoverItensPage> {
             ),
             body: Stack(
                 children: [
-                    MobileScanner(onDetect: scanQR),
-                    Positioned(
+                    if (false || !_isCameraError) ...[
+                        MobileScanner(onDetect: scanQR),
+                        Positioned(
                         top: 50.0,
                         left: 70,
                         child: Container(
@@ -180,19 +184,54 @@ class _MoverItensPageState extends State<MoverItensPage> {
                                 ]
                             ),
                         )
-                    ),
-                    Positioned(
-                        top: 200,
-                        left: 70,
-                        child: Container(
-                            height: 220,
-                            width: 250,
-                            decoration: BoxDecoration(
-                                color: Color.fromRGBO(0, 0, 0, 0.2),
-                                border: BoxBorder.all(color: Colors.red),
-                                borderRadius: BorderRadius.all(Radius.circular(4)))
+                        ),
+                        Positioned(
+                            top: 200,
+                            left: 70,
+                            child: Container(
+                                height: 220,
+                                width: 250,
+                                decoration: BoxDecoration(
+                                    color: Color.fromRGBO(0, 0, 0, 0.2),
+                                    border: BoxBorder.all(color: Colors.red),
+                                    borderRadius: BorderRadius.all(Radius.circular(4)))
+                            )
                         )
-                    )
+                    ] else ...[
+                        Center(
+                            child:
+                            Column(
+                            children: [
+                                TextField(
+                                controller: _tagController,
+                                decoration: InputDecoration(
+                                        hintText: 'Id da etiqueta',
+                                        border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(8.0),
+                                        ),
+                                        contentPadding: const EdgeInsets.symmetric(
+                                        vertical: 12.0,
+                                        horizontal: 16.0,
+                                        ),
+                                    ),
+                                ),
+                                ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.white,
+                                    foregroundColor: Colors.orange,
+                                    minimumSize: Size(double.infinity, 50),
+                                    padding: const EdgeInsets.symmetric(vertical: 15.0),
+                                    side: BorderSide(color: Colors.orange)
+                                    ),
+                                onPressed: () => handleInput(_tagController.text),
+                                child: const Text(
+                                    'Ler etiqueta',
+                                    style: TextStyle(fontSize: 18),
+                                ),
+                                )
+                                    ]
+                                ))
+                    ]
                 ],
             ),
             bottomNavigationBar: Builder(builder: (builderCtx) {
