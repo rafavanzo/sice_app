@@ -9,7 +9,7 @@ import 'package:http/http.dart' as http;
 /// Gerencia permissões, inicialização e visualização da câmera para identificação
 /// dos itens através de seus códigos QR.
 class MoverItensPage extends StatefulWidget {
-  const MoverItensPage({Key? key}) : super(key: key);
+  const MoverItensPage({super.key});
 
   @override
   State<MoverItensPage> createState() => _MoverItensPageState();
