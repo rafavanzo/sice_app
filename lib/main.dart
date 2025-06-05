@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'pages/mover_items.dart';
-import 'pages/consultar_locais.dart';
-import 'pages/consultar_items.dart';
+
 import 'pages/cadastrar.dart';
+import 'pages/consultar_items.dart';
+import 'pages/consultar_locais.dart';
+import 'pages/mover_items.dart';
 
 void main() {
   runApp(MyApp());
@@ -25,8 +26,8 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ButtonStyle customButtonStyle = ElevatedButton.styleFrom(
-      primary: Colors.white,
-      onPrimary: Colors.black,
+      // primary: Colors.white,
+      // onPrimary: Colors.black,
       side: const BorderSide(color: Colors.black, width: 2),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
@@ -80,6 +81,7 @@ class HomePage extends StatelessWidget {
             style: TextStyle(fontSize: 30)),
         centerTitle: true,
         backgroundColor: Colors.grey[850],
+        foregroundColor: Colors.white,
       ),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 32.0),
