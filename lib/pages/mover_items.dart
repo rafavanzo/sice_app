@@ -72,7 +72,11 @@ class _MoverItensPageState extends State<MoverItensPage> {
         }
     }
 
+    bool _readingEnabled = true;
+
     void scanQR(BarcodeCapture scan) {
+        if (!_readingEnabled) return;
+
         if(_firstScan) {
             setState(() {
                 _localQr = scan.barcodes.first.rawValue ?? "";
@@ -82,12 +86,13 @@ class _MoverItensPageState extends State<MoverItensPage> {
         if(!_firstScan) {
             setState(() {
                 _itens.add(scan.barcodes.first.rawValue);
+                _readingEnabled = false;
             });
         }
     }
 
     Future<dynamic> saveSchema() async {
-        dotenv.load(fileName: '.env');
+        await dotenv.load(fileName: '.env');
 
         final String uri = '${dotenv.env['API_URL']!}/""';
 
@@ -95,39 +100,79 @@ class _MoverItensPageState extends State<MoverItensPage> {
             _isLoading = true;
         });
 
+        int successCount = 0;
+        List<String> failedItems = [];
+
         try {
-            final res = await http.put(
-                Uri.parse(uri),
-                headers: <String,String>{'Content-Type': 'application/json; charset=UTF-8'},
-                body: jsonEncode({
-                    'itens': _itens,
-                    'local': _localQr
-                }),
-            );
+            for (var itemId in _itens) {
+                try {
+                    final response = await http.put(
+                        Uri.parse('$uri/items'),
+                        headers: <String, String>{
+                            'Content-Type': 'application/json; charset=UTF-8'
+                        },
+                        body: jsonEncode({
+                            'id': itemId,
+                            'packageId': _localQr
+                        }),
+                    );
+
+                    if (response.statusCode == 200) {
+                        successCount++;
+                    } else {
+                        failedItems.add('$itemId (Erro: ${response.statusCode})');
+                    }
+                } catch (itemError) {
+                    failedItems.add('$itemId (Erro: $itemError)');
+                }
+            }
+
+            // Show result message
+            final message = successCount == _itens.length
+                ? 'Todos os ${_itens.length} itens foram movidos com sucesso!'
+                : 'Movidos $successCount de ${_itens.length} itens.';
 
             ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                    content: res.statusCode == 200 ? Text('Local cadastrado com sucesso!') : Column(children: [
-                        Text('Erro ${res.statusCode}'),
-                        Text('Razão ${res.body}')
-                    ]),
-                    backgroundColor: res.statusCode != 200 ? Colors.red : Colors.green,
+                    content: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                            Text(message),
+                            if (failedItems.isNotEmpty) ...[
+                                SizedBox(height: 8),
+                                Text('Falhas:'),
+                                ...failedItems.take(3).map((item) => Text('- $item')),
+                                if (failedItems.length > 3)
+                                    Text('+ ${failedItems.length - 3} outros erros')
+                            ]
+                        ],
+                    ),
+                    backgroundColor: failedItems.isEmpty ? Colors.green : Colors.orange,
                     duration: Duration(seconds: 8),
                 ),
             );
-        } catch(err) {
+
+        } catch (err) {
             // ignore: avoid_print
             print(err);
 
             ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                    content: Column(children: [
-                        Text("Erro $err"),
-                    ]),
+                    content: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                            Text("Erro ao processar movimentação: $err"),
+                        ]
+                    ),
                     backgroundColor: Colors.red,
                     duration: Duration(seconds: 10),
                 )
             );
+        } finally {
+            setState(() {
+                _isLoading = false;
+            });
         }
     }
 
@@ -230,7 +275,38 @@ class _MoverItensPageState extends State<MoverItensPage> {
                             SizedBox(height: 20),
                             ElevatedButton(
                                 onPressed: () {
-                                    saveSchema();
+                                    showDialog(
+                                        context: context,
+                                        builder: (BuildContext dialogContext) {
+                                            return AlertDialog(
+                                                actions: [
+                                                    TextButton(
+                                                        onPressed: () {
+                                                            Navigator.of(dialogContext).pop();
+                                                            setState(() {
+                                                                _firstScan = false;
+                                                                _readingEnabled = true;
+                                                            });
+                                                        },
+                                                        child: Text('Continuar movendo itens'),
+                                                        style: TextButton.styleFrom(
+                                                            foregroundColor: Colors.blue
+                                                        ),
+                                                    ),
+                                                    TextButton(
+                                                        onPressed: () {
+                                                            Navigator.of(dialogContext).pop();
+                                                            saveSchema();
+                                                        },
+                                                        child: Text('Finalizar'),
+                                                        style: TextButton.styleFrom(
+                                                            foregroundColor: Colors.red
+                                                        ),
+                                                    ),
+                                                ],
+                                            );
+                                        },
+                                    );
                                 },
                                 style: ElevatedButton.styleFrom(
                                     backgroundColor: Colors.orange,
@@ -250,7 +326,7 @@ class _MoverItensPageState extends State<MoverItensPage> {
                                     )
                                     : Column(children: [
                                         Text("Itens: ${_itens.length}"),
-                                        Text("Terminar Adições?")
+                                        Text("Finalizar?"),
                                     ]) ,
                             ),
                             SizedBox(height: 12,)
@@ -263,4 +339,4 @@ class _MoverItensPageState extends State<MoverItensPage> {
             }
         ));
     }
-} 
+}
