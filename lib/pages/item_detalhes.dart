@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sice_app/pages/local_detalhes.dart';
+import 'package:http/http.dart' as http;
 
 /// Tela de detalhes do item selecionado.
 /// Exibe informações do item e permite navegar para o local onde está.
@@ -7,10 +8,11 @@ import 'package:sice_app/pages/local_detalhes.dart';
 class ItemDetalhesPage extends StatefulWidget {
   final String id;
   final String nome;
+  final String description;
   List<dynamic> local;
 
   ItemDetalhesPage(
-      {super.key, required this.id, required this.nome, required this.local});
+      {super.key, required this.id, required this.nome, required this.description, required this.local});
 
   @override
   State<ItemDetalhesPage> createState() => _ItemDetalhesPageState();
@@ -70,8 +72,9 @@ class _ItemDetalhesPageState extends State<ItemDetalhesPage> {
             padding: const EdgeInsets.symmetric(vertical: 15.0),
             side: BorderSide(color: Colors.orange[800]!),
           ),
-          onPressed: () {
-            print('Remover item do local');
+          onPressed: () async {
+            print('id: ${widget.id}');
+            // await http.delete(Uri.parse(uri))
           },
           child: const Text(
             'Remover do Local',
@@ -183,7 +186,7 @@ class _ItemDetalhesPageState extends State<ItemDetalhesPage> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    widget.local[0]['name'], // widget.local
+                    widget.local.isNotEmpty ? widget.local[0]['name'] : "Não há local configurado", // widget.local
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
@@ -218,7 +221,7 @@ class _ItemDetalhesPageState extends State<ItemDetalhesPage> {
               border: Border.all(color: Colors.grey.shade200),
             ),
             child: Text(
-              widget.local[0]['description'], // _descricao,
+              widget.description,
               style: TextStyle(
                 fontSize: 16,
                 height: 1.5,

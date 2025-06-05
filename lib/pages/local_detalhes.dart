@@ -266,6 +266,7 @@ class _LocalDetalhesPageState extends State<LocalDetalhesPage> {
                             builder: (context) => ItemDetalhesPage(
                               id: item['id'].toString(),
                               nome: item['name'],
+                              description: item['description'],
                               local: widget.local,
                             ),
                           ),

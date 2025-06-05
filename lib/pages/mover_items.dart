@@ -105,7 +105,6 @@ class _MoverItensPageState extends State<MoverItensPage> {
     });
 
     int successCount = 0;
-    bool newPackageCreated = false;
     List<String> failedItems = [];
 
     try {
@@ -118,8 +117,8 @@ class _MoverItensPageState extends State<MoverItensPage> {
             },
             body: jsonEncode(<String, Map>{
                "record": {
-                   // 'id': itemId,
-                   'packageId': _localQr,
+                   'id': itemId,
+                   // 'packageId': _localQr,
                    'tagid': _localQr,
                    'name': "item $itemId",
                    'description': 'A inserir',
@@ -134,38 +133,6 @@ class _MoverItensPageState extends State<MoverItensPage> {
           }
         } catch (itemError) {
           failedItems.add('$itemId (Erro: $itemError)');
-        }
-
-        if(failedItems.length != _itens.length) {
-            final newPackageResponse = await http.post(
-                Uri.parse('$uri/package'),
-                headers: {'Content-Type': 'application/json; charset=UTF-8'},
-                body: jsonEncode(<String, Map>{
-                    "record": {
-                        "name": "Prateleira ${_itens.length}",
-                        "packageId": 10,
-                        "tagid": _localQr,
-                        "description": "a inserir"
-                    }
-                })
-            );
-
-            if(newPackageResponse.statusCode != 200) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: newPackageResponse.statusCode == 200
-                        ? Text('Local cadastrado com sucesso!')
-                        : Column(children: [
-                            Text('Erro ${newPackageResponse.statusCode}'),
-                            Text('Razão ${newPackageResponse.body}')
-                          ]),
-                    backgroundColor: newPackageResponse.statusCode != 200 ? Colors.red : Colors.green,
-                    duration: Duration(seconds: 2),
-                  ),
-                );
-            } else {
-                newPackageCreated = true;
-            }
         }
       }
 
@@ -194,7 +161,7 @@ class _MoverItensPageState extends State<MoverItensPage> {
         ),
       );
 
-      if(successCount == _itens.length && newPackageCreated) {
+      if(successCount == _itens.length) {
           Navigator.pop(context);
       }
     } catch (err) {

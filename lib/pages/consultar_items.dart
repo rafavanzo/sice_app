@@ -87,6 +87,10 @@ class _ConsultarItemsPageState extends State<ConsultarItemsPage> {
         _hasError = false;
       });
 
+      if(id == 'null') {
+          return {"id": null, "nome": nome, "packageData": [] };
+      }
+
       final package = await http.get(Uri.parse('$uri/package?id=$id'),
           headers: <String, String>{
             'Content-Type': 'application/json; charset=UTF-8'
@@ -151,6 +155,8 @@ class _ConsultarItemsPageState extends State<ConsultarItemsPage> {
 
         return;
       }
+
+      print('itens on load itens ${item.body}');
 
       final dynamic itemData = jsonDecode(item.body)['data'];
 
@@ -373,11 +379,14 @@ class _ConsultarItemsPageState extends State<ConsultarItemsPage> {
               return;
             }
 
+            print('id ${res}');
+
             Navigator.push(
                 _scaffoldKey.currentContext!,
                 MaterialPageRoute(
                     builder: (context) => ItemDetalhesPage(
-                        id: res['id'],
+                        id: res['id'] ?? "",
+                        description: item['description'],
                         nome: res['nome'],
                         local: res['packageData'])));
           },
