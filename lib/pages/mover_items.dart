@@ -86,7 +86,6 @@ class _MoverItensPageState extends State<MoverItensPage> {
                 _itens.add(input);
             });
         }
-    }
 
     if (!_firstScan) {
       setState(() {
