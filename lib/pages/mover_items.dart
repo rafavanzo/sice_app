@@ -156,7 +156,7 @@ class _MoverItensPageState extends State<MoverItensPage> {
             ),
             body: Stack(
                 children: [
-                    if (false || !_isCameraError) ...[
+                    if (true && !_isCameraError) ...[
                         MobileScanner(onDetect: scanQR),
                         Positioned(
                         top: 50.0,
