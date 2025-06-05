@@ -78,18 +78,17 @@ class _MoverItensPageState extends State<MoverItensPage> {
     if (!_readingEnabled) return;
 
     if (_firstScan) {
-            setState(() {
-                _localQr = input;
-            });
-        } else {
-            setState(() {
-                _itens.add(input);
-            });
-        }
+        setState(() {
+            _localQr = input;
+        });
+    } else {
+        setState(() {
+            _itens.add(input);
+        });
+    }
 
     if (!_firstScan) {
       setState(() {
-        _itens.add(input);
         _readingEnabled = false;
       });
     }
@@ -121,7 +120,7 @@ class _MoverItensPageState extends State<MoverItensPage> {
                    // 'packageId': _localQr,
                    'tagid': _localQr,
                    'name': "item $itemId",
-                   'description': 'A inserir',
+                   'description': 'Sem Descrição',
                 }
             }),
           );
@@ -129,7 +128,9 @@ class _MoverItensPageState extends State<MoverItensPage> {
           if (response.statusCode == 200) {
             successCount++;
           } else {
-            failedItems.add('$itemId (Erro: ${response.statusCode})');
+            failedItems.add('$itemId (Erro: ${response.statusCode}) - ${jsonDecode(response.body)['error']}');
+
+            // print('error on add iten: ${response.body}');
           }
         } catch (itemError) {
           failedItems.add('$itemId (Erro: $itemError)');

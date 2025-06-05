@@ -88,6 +88,8 @@ class _ConsultarItemsPageState extends State<ConsultarItemsPage> {
       });
 
       if(id == 'null') {
+          _hasError = false;
+          _isLoading = false;
           return {"id": null, "nome": nome, "packageData": [] };
       }
 
