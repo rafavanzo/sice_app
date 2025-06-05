@@ -21,14 +21,15 @@ class LocalService {
 
   /// Filtra locais pelo nome (simulado).
   /// Retorna lista filtrada de objetos Local.
-  Future<List<dynamic>> buscarLocaisPorNome(String query, List<dynamic> locais) async {
-
+  Future<List<dynamic>> buscarLocaisPorNome(
+      String query, List<dynamic> locais) async {
     if (query.isEmpty) {
       return locais;
     }
 
     return locais
-        .where((local) => local['name'].toLowerCase().contains(query.toLowerCase()))
+        .where((local) =>
+            local['name'].toLowerCase().contains(query.toLowerCase()))
         .toList();
   }
 }
@@ -36,7 +37,7 @@ class LocalService {
 /// Página para consulta e visualização de locais.
 /// Permite pesquisa, listagem e acesso à leitura de QR code.
 class ConsultarLocaisPage extends StatefulWidget {
-  const ConsultarLocaisPage({Key? key}) : super(key: key);
+  const ConsultarLocaisPage({super.key});
 
   @override
   State<ConsultarLocaisPage> createState() => _ConsultarLocaisPageState();
@@ -61,43 +62,39 @@ class _ConsultarLocaisPageState extends State<ConsultarLocaisPage> {
     _carregarLocais();
   }
 
-
   /// Carrega a lista inicial de locais.
   /// Ponto futuro de integração com API real.
   Future<void> _carregarLocais() async {
     try {
+      await dotenv.load(fileName: '.env');
 
-        await dotenv.load(fileName: '.env');
+      String uri = '${dotenv.env['API_URL']!}/package';
 
-        String uri = '${dotenv.env['API_URL']!}/package';
+      setState(() {
+        _isLoading = true;
+        _hasError = false;
+      });
 
+      final res = await http.get(Uri.parse(uri), headers: <String, String>{
+        'Content-type': 'application/json; charset=UTF-8'
+      });
+
+      if (res.statusCode != 200) {
         setState(() {
-          _isLoading = true;
-          _hasError = false;
+          _isLoading = false;
+          _hasError = true;
         });
 
-        final res = await http.get(
-            Uri.parse(uri),
-            headers: <String, String>{'Content-type': 'application/json; charset=UTF-8'}
-        );
+        return;
+      }
 
-        if(res.statusCode != 200)  {
-            setState(() {
-                _isLoading = false;
-                _hasError = true;
-            });
-
-            return;
-        }
-
-      final List<dynamic>locais = jsonDecode(res.body)['data'];
+      final List<dynamic> locais = jsonDecode(res.body)['data'];
 
       setState(() {
         _locais = locais;
         _locaisFiltrados = locais;
         _isLoading = false;
       });
-
     } catch (e) {
       setState(() {
         _hasError = true;
@@ -123,7 +120,8 @@ class _ConsultarLocaisPageState extends State<ConsultarLocaisPage> {
     });
 
     try {
-      final List<dynamic> locaisFiltrados = await _localService.buscarLocaisPorNome(query, _locais);
+      final List<dynamic> locaisFiltrados =
+          await _localService.buscarLocaisPorNome(query, _locais);
 
       setState(() {
         _locaisFiltrados = locaisFiltrados;
@@ -291,10 +289,8 @@ class _ConsultarLocaisPageState extends State<ConsultarLocaisPage> {
             Icons.chevron_right,
             color: Colors.grey,
           ),
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 16.0,
-            vertical: 4.0
-          ),
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
           onTap: () {
             // Navegar para a view detalhada do local
             Navigator.push(
@@ -304,6 +300,7 @@ class _ConsultarLocaisPageState extends State<ConsultarLocaisPage> {
                   id: local['id'],
                   nome: local['name'],
                   descricao: local['description'],
+                  local: _locais,
                 ),
               ),
             );

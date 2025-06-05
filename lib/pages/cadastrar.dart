@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:sice_app/complements/qrcode.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -27,47 +26,47 @@ class _CadastrarPageState extends State<CadastrarPage> {
   }
 
   Future<void> _cadastrar(String data) async {
-
     setState(() {
       _isLoading = true;
     });
 
     await dotenv.load(fileName: ".env");
 
-    String uri = '${dotenv.env['API_URL']!}/${_isCadastroLocal ? "package" : "item" }';
+    String uri =
+        '${dotenv.env['API_URL']!}/${_isCadastroLocal ? "package" : "item"}';
 
     Future<void> sendItem(Object data) async {
-        final res = await http.post(
-            Uri.parse(uri),
-            headers: <String, String>{'Content-Type': 'application/json; charset=UTF-8'},
-            body: data
+      final res = await http.post(Uri.parse(uri),
+          headers: <String, String>{
+            'Content-Type': 'application/json; charset=UTF-8'
+          },
+          body: data);
+
+      Future.delayed(Duration(seconds: 3), () {
+        setState(() {
+          _isLoading = false;
+        });
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: res.statusCode == 200
+                ? Text('Local cadastrado com sucesso!')
+                : Column(children: [
+                    Text('Erro ${res.statusCode}'),
+                    Text('Razão ${res.body}')
+                  ]),
+            backgroundColor: res.statusCode != 200 ? Colors.red : Colors.green,
+            duration: Duration(seconds: 2),
+          ),
         );
 
-        Future.delayed(Duration(seconds: 3), () {
-            setState(() {
-                _isLoading = false;
-            });
+        if (res.statusCode == 200) {
+          _nomeController.clear();
+          _descricaoController.clear();
 
-            ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: res.statusCode == 200 ? Text('Local cadastrado com sucesso!') : Column(children: [
-                     Text('Erro ${res.statusCode}'),
-                     Text('Razão ${res.body}')
-                  ]),
-                  backgroundColor: res.statusCode != 200 ? Colors.red : Colors.green,
-                  duration: Duration(seconds: 2),
-                ),
-            );
-
-            if(res.statusCode == 200) {
-
-                _nomeController.clear();
-                _descricaoController.clear();
-
-                Navigator.of(context).pop();
-            }
-
-        });
+          Navigator.of(context).pop();
+        }
+      });
     }
 
     sendItem(data);
@@ -110,9 +109,10 @@ class _CadastrarPageState extends State<CadastrarPage> {
                 Expanded(
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                        backgroundColor: _isCadastroLocal ? Colors.orange : Colors.grey,
-                        foregroundColor: _isCadastroLocal ? Colors.white : Colors.black
-                    ),
+                        backgroundColor:
+                            _isCadastroLocal ? Colors.orange : Colors.grey,
+                        foregroundColor:
+                            _isCadastroLocal ? Colors.white : Colors.black),
                     onPressed: () {
                       setState(() {
                         _isCadastroLocal = true;
@@ -125,8 +125,10 @@ class _CadastrarPageState extends State<CadastrarPage> {
                 Expanded(
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                        backgroundColor: !_isCadastroLocal ? Colors.orange : Colors.grey,
-                        foregroundColor: !_isCadastroLocal ? Colors.white : Colors.black,
+                      backgroundColor:
+                          !_isCadastroLocal ? Colors.orange : Colors.grey,
+                      foregroundColor:
+                          !_isCadastroLocal ? Colors.white : Colors.black,
                       padding: const EdgeInsets.symmetric(vertical: 12),
                       side: BorderSide(
                         color: !_isCadastroLocal ? Colors.orange : Colors.grey,
@@ -158,9 +160,7 @@ class _CadastrarPageState extends State<CadastrarPage> {
             TextField(
               controller: _nomeController,
               decoration: InputDecoration(
-                hintText: _isCadastroLocal
-                    ? 'Nome do local'
-                    : 'Nome do item',
+                hintText: _isCadastroLocal ? 'Nome do local' : 'Nome do item',
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8.0),
                 ),
@@ -214,36 +214,37 @@ class _CadastrarPageState extends State<CadastrarPage> {
                 padding: const EdgeInsets.symmetric(vertical: 15.0),
               ),
               onPressed: () {
-                _cadastrar(
-                    jsonEncode(<String, Map>{"record": {"name": _nomeController.text, "description": _descricaoController.text} })
-                );
+                _cadastrar(jsonEncode(<String, Map>{
+                  "record": {
+                    "name": _nomeController.text,
+                    "description": _descricaoController.text
+                  }
+                }));
               },
               child: _isLoading
-                ? const SizedBox(
-                    height: 20,
-                    width: 20,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 3,
-                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                  ? const SizedBox(
+                      height: 20,
+                      width: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 3,
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                      ),
+                    )
+                  : Text(
+                      'Cadastrar',
+                      style: TextStyle(fontSize: 18),
                     ),
-                  )
-                : Text(
-                    'Cadastrar',
-                    style: TextStyle(fontSize: 18),
-                  ),
             ),
           ),
-
           Padding(
             padding: const EdgeInsets.fromLTRB(16.0, 0.0, 16.0, 16.0),
             child: ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.white,
-                foregroundColor: Colors.orange,
-                minimumSize: Size(double.infinity, 50),
-                padding: const EdgeInsets.symmetric(vertical: 15.0),
-                side: BorderSide(color: Colors.orange)
-                ),
+                  backgroundColor: Colors.white,
+                  foregroundColor: Colors.orange,
+                  minimumSize: Size(double.infinity, 50),
+                  padding: const EdgeInsets.symmetric(vertical: 15.0),
+                  side: BorderSide(color: Colors.orange)),
               onPressed: () => Navigator.of(context).pop(),
               child: const Text(
                 'Cancelar',

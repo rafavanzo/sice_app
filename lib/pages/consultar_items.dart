@@ -1,7 +1,4 @@
-import 'dart:developer';
-import 'dart:io';
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'item_detalhes.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -10,31 +7,42 @@ import 'package:http/http.dart' as http;
 /// Modelo para representar um item no sistema.
 /// Contém id, nome e local do item.
 class Item {
-  final String id;
-  final String nome;
+  final int id;
+  final int tagid;
+  final int categoryid;
+  final int userid;
+  final int packageid;
+
+  final String name;
+  final String description;
   // final String local;
 
-  Item({
-    required this.id,
-    required this.nome
-    // required this.local
-  });
+  Item(
+      {required this.id,
+      required this.name,
+      required this.description,
+      required this.tagid,
+      required this.categoryid,
+      required this.packageid,
+      required this.userid
+      // required this.local
+      });
 }
 
 /// Serviço que encapsula operações de dados de itens.
 /// Preparado para futura substituição por API real.
 class ItemService {
-
   /// Filtra itens pelo nome (simulado).
   /// Retorna lista filtrada de objetos Item.
-  Future<List<dynamic>> buscarItemsPorNome(String query, List<dynamic> items) async {
-
+  Future<List<dynamic>> buscarItemsPorNome(
+      String query, List<dynamic> items) async {
     if (query.isEmpty) {
       return items;
     }
 
     return items
-        .where((item) => item['nome'].toLowerCase().contains(query.toLowerCase()))
+        .where((item) =>
+            item['name'].toLowerCase().contains(query.toLowerCase()))
         .toList();
   }
 }
@@ -42,7 +50,7 @@ class ItemService {
 /// Página para consulta e visualização de itens.
 /// Permite pesquisa, listagem e acesso à leitura de QR code.
 class ConsultarItemsPage extends StatefulWidget {
-  const ConsultarItemsPage({Key? key}) : super(key: key);
+  const ConsultarItemsPage({super.key});
 
   @override
   State<ConsultarItemsPage> createState() => _ConsultarItemsPageState();
@@ -51,6 +59,7 @@ class ConsultarItemsPage extends StatefulWidget {
 class _ConsultarItemsPageState extends State<ConsultarItemsPage> {
   final TextEditingController _pesquisaController = TextEditingController();
   final ItemService _itemService = ItemService();
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   List<dynamic> _items = [];
   List<dynamic> _itemsFiltrados = [];
@@ -65,29 +74,73 @@ class _ConsultarItemsPageState extends State<ConsultarItemsPage> {
     _items = [];
     _itemsFiltrados = [];
     _carregarItems();
-    teste();
   }
 
-  /// Carrega a lista inicial de itens.
-  /// Ponto futuro de integração com API real.
-  Future<void> _carregarItems() async {
+  dynamic _carregarLocal(
+      String id, String nome) async {
     try {
-
       await dotenv.load(fileName: ".env");
 
-      String uri = '${dotenv.env['API_URL']!}/item';
+      String uri = '${dotenv.env['API_URL']}';
 
       setState(() {
         _isLoading = true;
         _hasError = false;
       });
 
-      final res = await http.get(
-        Uri.parse(uri),
-        headers: <String, String>{'Content-Type': 'application/json; charset=UTF-8'},
+      final package = await http.get(Uri.parse('$uri/package?id=$id'),
+          headers: <String, String>{
+            'Content-Type': 'application/json; charset=UTF-8'
+          });
+
+      if (package.statusCode != 200) {
+        setState(() {
+          _hasError = true;
+          _isLoading = false;
+        });
+
+        final errorData = jsonDecode(package.body);
+
+        return { "error": true, "statusCode": package.statusCode, "body": errorData['error']};
+      }
+
+      final dynamic packageData = jsonDecode(package.body)['data'];
+
+        setState(() {
+            _isLoading = false;
+        });
+
+        return {"id": id, "nome": nome, "packageData": packageData };
+    } catch (e) {
+      setState(() {
+        _hasError = true;
+        _errorMessage = 'Erro ao carregar itens: ${e.toString()}';
+        _isLoading = false;
+      });
+    }
+  }
+
+  /// Carrega a lista inicial de itens.
+  /// Ponto futuro de integração com API real.
+  Future<void> _carregarItems() async {
+    try {
+      await dotenv.load(fileName: ".env");
+
+      String uri = dotenv.env['API_URL']!;
+
+      setState(() {
+        _isLoading = true;
+        _hasError = false;
+      });
+
+      final item = await http.get(
+        Uri.parse("$uri/item"),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8'
+        },
       );
 
-      if(res.statusCode != 200) {
+      if (item.statusCode != 200) {
         setState(() {
           _hasError = true;
           _isLoading = false;
@@ -96,14 +149,14 @@ class _ConsultarItemsPageState extends State<ConsultarItemsPage> {
         return;
       }
 
-      final List<dynamic>items = jsonDecode(res.body)['data'];
+      final dynamic itemData = jsonDecode(item.body)['data'];
 
       setState(() {
-        _items = items;
-        _itemsFiltrados = items;
+        _items = itemData;
+        _itemsFiltrados = itemData;
         _isLoading = false;
+        _hasError = false;
       });
-
     } catch (e) {
       setState(() {
         _hasError = true;
@@ -118,7 +171,7 @@ class _ConsultarItemsPageState extends State<ConsultarItemsPage> {
   Future<void> _filtrarItems(String query) async {
     if (query.isEmpty) {
       setState(() {
-        _itemsFiltrados = List<Item>.from(_items);
+        _itemsFiltrados = _items;
         _isLoading = false;
       });
       return;
@@ -129,7 +182,8 @@ class _ConsultarItemsPageState extends State<ConsultarItemsPage> {
     });
 
     try {
-      final List<dynamic> itemsFiltrados = await _itemService.buscarItemsPorNome(query, _items);
+      final List<dynamic> itemsFiltrados =
+          await _itemService.buscarItemsPorNome(query, _items);
 
       setState(() {
         _itemsFiltrados = itemsFiltrados;
@@ -144,18 +198,6 @@ class _ConsultarItemsPageState extends State<ConsultarItemsPage> {
     }
   }
 
-  Future teste() async {
-    final res = await http.get(Uri.parse('https://www.google.com'));
-
-    if(res.statusCode != 200) {
-        print("Mensagem");
-
-        return false;
-    }
-
-    return res;
-  }
-
   @override
   void dispose() {
     _pesquisaController.dispose();
@@ -165,12 +207,18 @@ class _ConsultarItemsPageState extends State<ConsultarItemsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _scaffoldKey,
       appBar: AppBar(
+        backgroundColor: Colors.grey[850],
+        leading: IconButton(
+          icon: Icon(Icons.chevron_left, color: Colors.white, size: 30),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
         title: const Text(
           'Consultar Itens',
           style: TextStyle(color: Colors.white),
         ),
-        backgroundColor: Colors.grey[850],
+        elevation: 0,
       ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -196,7 +244,6 @@ class _ConsultarItemsPageState extends State<ConsultarItemsPage> {
                         controller: _pesquisaController,
                         onChanged: (String value) {
                           _filtrarItems(value);
-                          teste();
                         },
                         decoration: InputDecoration(
                           hintText: 'Digite para buscar um item',
@@ -276,7 +323,7 @@ class _ConsultarItemsPageState extends State<ConsultarItemsPage> {
             const SizedBox(height: 16),
             ElevatedButton(
               onPressed: () {
-                _carregarItems;
+                _carregarItems();
               },
               child: const Text('Tentar novamente'),
             ),
@@ -302,7 +349,7 @@ class _ConsultarItemsPageState extends State<ConsultarItemsPage> {
         final item = _itemsFiltrados[index];
         return ListTile(
           title: Text(
-            item['nome'],
+            item['name'],
             style: const TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
@@ -312,30 +359,40 @@ class _ConsultarItemsPageState extends State<ConsultarItemsPage> {
           subtitle: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Local: ${item.local}'),
+              Text('${item['description']}'),
             ],
           ),
           trailing: const Icon(
             Icons.chevron_right,
             color: Colors.grey,
           ),
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 16.0,
-            vertical: 4.0
-          ),
-          onTap: () {
-            // Navegar para a view detalhada do item
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => ItemDetalhesPage(
-                  id: item['id'],
-                  nome: item['nome'],
-                  // local: item.local,
-                ),
-              ),
-            );
-          },
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
+          onTap: () async {
+              final res = await _carregarLocal(item['tagid'].toString(), item['name']);
+
+              if(res["error"] == true) {
+                ScaffoldMessenger.of(_scaffoldKey.currentContext!).showSnackBar(
+                  SnackBar(
+                    content: Column(children: [
+                        Text('Erro ${res["statusCode"]}'),
+                        Text('Razão: ${res["body"]}')
+                    ]),
+                    backgroundColor: Colors.red,
+                    duration: Duration(seconds: 4),
+                  ),
+                );
+
+                return;
+              }
+
+              Navigator.push(
+                  _scaffoldKey.currentContext!,
+                  MaterialPageRoute(
+                      builder: (context) => ItemDetalhesPage(id: res['id'], nome: res['nome'], local: res['packageData'])
+                    )
+                );
+            },
         );
       },
     );

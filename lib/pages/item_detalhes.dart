@@ -1,20 +1,16 @@
 import 'package:flutter/material.dart';
-import 'consultar_items.dart';
-import 'local_detalhes.dart';
+import 'package:sice_app/pages/local_detalhes.dart';
 
 /// Tela de detalhes do item selecionado.
 /// Exibe informações do item e permite navegar para o local onde está.
+// ignore: must_be_immutable
 class ItemDetalhesPage extends StatefulWidget {
   final String id;
   final String nome;
-  // final String local;
+  List<dynamic> local;
 
-  const ItemDetalhesPage({
-    Key? key,
-    required this.id,
-    required this.nome,
-    // required this.local,
-  }) : super(key: key);
+  ItemDetalhesPage(
+      {super.key, required this.id, required this.nome, required this.local});
 
   @override
   State<ItemDetalhesPage> createState() => _ItemDetalhesPageState();
@@ -161,18 +157,19 @@ class _ItemDetalhesPageState extends State<ItemDetalhesPage> {
           InkWell(
             onTap: () {
               // Navegar para o local do item
-              // if (_localId.isNotEmpty) {
-              //   Navigator.push(
-              //     context,
-              //     MaterialPageRoute(
-              //       builder: (context) => LocalDetalhesPage(
-              //         id: _localId,
-              //         descricao: "",
-              //         nome: "",// nome: widget.local,
-              //       ),
-              //     ),
-              //   );
-              // }
+              if (widget.local.isNotEmpty) {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => LocalDetalhesPage(
+                      local: widget.local,
+                      id: widget.local[0]['id'],
+                      descricao: widget.local[0]['description'],
+                      nome: widget.local[0]['name'], // nome: widget.local,
+                    ),
+                  ),
+                );
+              }
             },
             borderRadius: BorderRadius.circular(8),
             child: Container(
@@ -186,7 +183,7 @@ class _ItemDetalhesPageState extends State<ItemDetalhesPage> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    "", // widget.local
+                    widget.local[0]['name'], // widget.local
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
@@ -221,7 +218,7 @@ class _ItemDetalhesPageState extends State<ItemDetalhesPage> {
               border: Border.all(color: Colors.grey.shade200),
             ),
             child: Text(
-              "",// _descricao,
+              widget.local[0]['description'], // _descricao,
               style: TextStyle(
                 fontSize: 16,
                 height: 1.5,
