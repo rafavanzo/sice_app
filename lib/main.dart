@@ -52,7 +52,8 @@ class HomePage extends StatelessWidget {
                     // Navega para a tela de consulta de locais
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => ConsultarLocaisPage()),
+                      MaterialPageRoute(
+                          builder: (context) => ConsultarLocaisPage()),
                     );
                   },
                 ),
@@ -64,7 +65,8 @@ class HomePage extends StatelessWidget {
                     // Navega para a tela de consulta de itens
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => ConsultarItemsPage()),
+                      MaterialPageRoute(
+                          builder: (context) => ConsultarItemsPage()),
                     );
                   },
                 ),
@@ -77,8 +79,7 @@ class HomePage extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('SICE',
-            style: TextStyle(fontSize: 30)),
+        title: const Text('SICE', style: TextStyle(fontSize: 30)),
         centerTitle: true,
         backgroundColor: Colors.grey[850],
         foregroundColor: Colors.white,

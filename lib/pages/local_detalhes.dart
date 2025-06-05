@@ -1,20 +1,27 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
-import 'consultar_items.dart'; // Importando para usar o modelo Item
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:http/http.dart' as http;
+
 import 'item_detalhes.dart'; // Importando para navegação
 
 /// Tela de detalhes do local selecionado.
 /// Exibe informações do local e os itens presentes nele.
+// ignore: must_be_immutable
 class LocalDetalhesPage extends StatefulWidget {
   final dynamic id;
   final String nome;
   final String? descricao;
 
-  const LocalDetalhesPage({
-    Key? key,
-    required this.id,
-    required this.nome,
-    this.descricao
-  }) : super(key: key);
+  dynamic local;
+
+  LocalDetalhesPage(
+      {super.key,
+      required this.id,
+      required this.nome,
+      required this.local,
+      this.descricao});
 
   @override
   State<LocalDetalhesPage> createState() => _LocalDetalhesPageState();
@@ -25,7 +32,7 @@ class _LocalDetalhesPageState extends State<LocalDetalhesPage> {
   bool _hasError = false;
   String _errorMessage = '';
 
-  List<Item> _itensNoLocal = [];
+  List<dynamic> _itensNoLocal = [];
 
   @override
   void initState() {
@@ -42,10 +49,29 @@ class _LocalDetalhesPageState extends State<LocalDetalhesPage> {
     try {
       await Future.delayed(Duration(milliseconds: 800));
 
-      // Dados simulados (vou substituir por chamadas a API)
+      await dotenv.load(fileName: '.env');
+
+      String uri = '${dotenv.env['API_URL']}/item?packageId=${widget.id}';
+
+      final packageItens = await http.get(Uri.parse(uri),
+          headers: <String, String>{
+            'Content-Type': 'application/json; charset=UTF-8'
+          });
+
+      if (packageItens.statusCode != 200) {
+        setState(() {
+          _hasError = true;
+          _isLoading = false;
+        });
+
+        return;
+      }
+
+      final packageItensData = jsonDecode(packageItens.body)['data'];
 
       setState(() {
         _isLoading = false;
+        _itensNoLocal = packageItensData;
       });
     } catch (e) {
       setState(() {
@@ -213,7 +239,7 @@ class _LocalDetalhesPageState extends State<LocalDetalhesPage> {
                     final item = _itensNoLocal[index];
                     return ListTile(
                       title: Text(
-                        item.nome,
+                        item['name'],
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
@@ -238,9 +264,9 @@ class _LocalDetalhesPageState extends State<LocalDetalhesPage> {
                           context,
                           MaterialPageRoute(
                             builder: (context) => ItemDetalhesPage(
-                              id: item.id,
-                              nome: item.nome,
-                              // local: item.local,
+                              id: item['id'].toString(),
+                              nome: item['name'],
+                              local: widget.local,
                             ),
                           ),
                         );
