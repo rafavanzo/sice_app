@@ -63,25 +63,6 @@ class _ItemDetalhesPageState extends State<ItemDetalhesPage> {
         elevation: 0,
       ),
       body: _buildBody(),
-      bottomNavigationBar: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: ElevatedButton(
-          style: ElevatedButton.styleFrom(
-            // primary: Colors.white,
-            // onPrimary: Colors.orange[800],
-            padding: const EdgeInsets.symmetric(vertical: 15.0),
-            side: BorderSide(color: Colors.orange[800]!),
-          ),
-          onPressed: () async {
-            print('id: ${widget.id}');
-            // await http.delete(Uri.parse(uri))
-          },
-          child: const Text(
-            'Remover do Local',
-            style: TextStyle(fontSize: 18),
-          ),
-        ),
-      ),
     );
   }
 

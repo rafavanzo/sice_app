@@ -215,23 +215,6 @@ class _ConsultarLocaisPageState extends State<ConsultarLocaisPage> {
           ),
         ],
       ),
-      bottomNavigationBar: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: ElevatedButton(
-          style: ElevatedButton.styleFrom(
-            // primary: Colors.orange,
-            // onPrimary: Colors.white,
-            padding: const EdgeInsets.symmetric(vertical: 15.0),
-          ),
-          onPressed: () {
-            // Levara a camera para ler o QR Code
-          },
-          child: const Text(
-            'Ler uma Etiqueta',
-            style: TextStyle(fontSize: 18),
-          ),
-        ),
-      ),
       backgroundColor: Colors.white,
     );
   }
