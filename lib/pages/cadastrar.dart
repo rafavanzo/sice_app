@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'cadastrar_qrcode.dart';
 
 // Tela para cadastro de novos locais ou itens no sistema.
 class CadastrarPage extends StatefulWidget {
@@ -214,12 +215,27 @@ class _CadastrarPageState extends State<CadastrarPage> {
                 padding: const EdgeInsets.symmetric(vertical: 15.0),
               ),
               onPressed: () {
-                _cadastrar(jsonEncode(<String, Map>{
-                  "record": {
-                    "name": _nomeController.text,
-                    "description": _descricaoController.text
-                  }
-                }));
+                // Validar se os campos estão preenchidos
+                if (_nomeController.text.trim().isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Por favor, digite um nome'),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                  return;
+                }
+
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => CadastrarQRCodePage(
+                      nome: _nomeController.text,
+                      descricao: _descricaoController.text,
+                      isLocal: _isCadastroLocal,
+                    ),
+                  ),
+                );
               },
               child: _isLoading
                   ? const SizedBox(
